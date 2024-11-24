@@ -17,21 +17,21 @@ import (
 const grpcPort = 50051
 
 type server struct {
-	desc.UnimplementedNoteV1Server
+	desc.UnimplementedAuthServer
 }
 
 // Get ...
 func (s *server) Get(ctx context.Context, req *desc.GetRequest) (*desc.GetResponse, error) {
-	log.Printf("Note id: %d", req.GetId())
+	log.Printf("User id: %d", req.GetId())
 
 	return &desc.GetResponse{
-		Note: &desc.Note{
+		User: &desc.User{
 			Id: req.GetId(),
-			Info: &desc.NoteInfo{
-				Title:    gofakeit.BeerName(),
-				Content:  gofakeit.IPv4Address(),
-				Author:   gofakeit.Name(),
-				IsPublic: gofakeit.Bool(),
+			User: &desc.UserInfo{
+				Name:            gofakeit.BeerName(),
+				Email:           gofakeit.Email(),
+				Password:        gofakeit.Password(true, true, true, true, true, 8),
+				PasswordConfirm: gofakeit.Password(true, true, true, true, true, 8),
 			},
 			CreatedAt: timestamppb.New(gofakeit.Date()),
 			UpdatedAt: timestamppb.New(gofakeit.Date()),
@@ -47,7 +47,7 @@ func main() {
 
 	s := grpc.NewServer()
 	reflection.Register(s)
-	desc.RegisterNoteV1Server(s, &server{})
+	desc.RegisterAuthServer(s, &server{})
 
 	log.Printf("server listening at %v", lis.Addr())
 
